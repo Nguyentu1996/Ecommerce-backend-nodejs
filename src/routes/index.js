@@ -1,7 +1,13 @@
 'use strict'
 const express = require('express')
-const routes = express.Router()
+const { checkApiKey, checkPermission } = require('../auth/checkAuth')
+const router = express.Router()
 
-routes.use('/v1/api', require('./access'))
+// check apiKey
+router.use(checkApiKey)
+// check permission
+router.use(checkPermission('0000'))
 
-module.exports = routes
+router.use('/v1/api', require('./access'))
+
+module.exports = router
