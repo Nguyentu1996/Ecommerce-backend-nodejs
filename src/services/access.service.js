@@ -1,49 +1,104 @@
-'use strict'
-const shopModel = require('../models/shop.model')
-const bcrypt = require('bcrypt')
-const crypto = require('crypto')
-
-const RoleShop = {
-  SHOP: 'SHOP',
-  WRITER: 'WRITER',
-  EDITOR: 'EDITOR',
-  ADMIN: 'ADMIN'
-}
-
+'use strict';
+const shopModel = require('../models/shop.model');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const KeyTokenService = require('./keyToken.service');
+const { createTokenPair } = require('../auth/authUtils');
+const { getInfoData, generateKeyPair } = require('../utils');
+const { RoleShop } = require('../constants/roles.shop');
+const { BadRequestError, AuthFailureError } = require('../core/error.response');
+const { findByEmail } = require('./shop.service')
 class AccessService {
-  static signUp = async (name, email, password) => { 
-    try {
-      // check email exists??
-      const holderShop = await shopModel.findOne({ email }).lean()
-      if (holderShop) {
-        return {
-          code: 'xxxx',
-          messages: 'Shop already registered!'
-        }
-      }
+  /*
+    1 - check email in dbs
+    2 - match password
+    3 - create AccessToken, RefreshToken
+    4 - generate Tokens
+    5 - get data return
+  */
+  static login = async ({ email, password, refreshToken = null }) => {
+    // 1.
+    const foundShop = await findByEmail({ email })
+    if (!foundShop) throw new BadRequestError('Error: Shop not registered!')
 
-      const passwordHash = await bcrypt.hash(password, 10)
-      const newShop = await shopModel.create({
-        name, email, passwordHash, roles: [RoleShop.SHOP]
-      })
+    // 2.
+    const match = await bcrypt.compare(password, foundShop.password)
+    if (!match) throw new AuthFailureError('Error: Authentication error!')
 
-      if (newShop) {
-        // create private key, public key
-        const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
-          modulesLength: 4096
-        })
+    // 3. create private key, public key
+    const { privateKey, publicKey } = generateKeyPair()
+    const { _id: userId } = foundShop;
+    const token = await createTokenPair(
+      { userId, email },
+      publicKey,
+      privateKey
+    );
 
-        console.log({ privateKey, publicKey }) // save collection keyStore
-      }
+    // save collection keyStore
+    await KeyTokenService.createKeyToken({
+      userId,
+      publicKey,
+      privateKey,
+      refreshToken: token.refreshToken
+    });
 
-    } catch (error) {
-      return {
-        code: 'xxx',
-        messages: error.messages,
-        status: 'error'
-      }
-    }
+    return {
+      shop: getInfoData({
+        fields: ['_id', 'name', 'email'],
+        object: foundShop,
+      }),
+      token,
+    };
   }
+
+  static signUp = async ({ name, email, password }) => {
+    // check email exists??
+    const holderShop = await shopModel.findOne({ email }).lean();
+    if (holderShop) {
+      throw new BadRequestError('Error: Shop already registered!')
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newShop = await shopModel.create({
+      name,
+      email,
+      password: passwordHash,
+      roles: [RoleShop.SHOP],
+    });
+
+    if (newShop) {
+      // create private key, public key
+      const { privateKey, publicKey } = generateKeyPair()
+
+      // save collection keyStore
+      const publicKeyString = await KeyTokenService.createKeyToken({
+        userId: newShop._id,
+        publicKey,
+      });
+
+      if (!publicKeyString) {
+        throw new BadRequestError('Error: publicKeyString error !')
+      }
+
+      const publicKeyObject = crypto.createPublicKey(publicKeyString);
+
+      const token = await createTokenPair(
+        { userId: newShop._id, email },
+        publicKeyObject,
+        privateKey
+      );
+
+      return {
+        shop: getInfoData({
+          fields: ['_id', 'name', 'email'],
+          object: newShop,
+        }),
+        token,
+      };
+    }
+
+    return null;
+  };
 }
 
-module.exports = AccessService
+module.exports = AccessService;
