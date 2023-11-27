@@ -1,6 +1,10 @@
 'use strict'
 
 const JWT = require('jsonwebtoken')
+const { HEADER } = require('../constants/header.api')
+const { AuthFailureError, NotFoundError } = require('../core/error.response')
+const KeyTokenService = require('../services/keyToken.service')
+const { asyncHandle } = require('../helpers/asyncHandle')
 
 const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
@@ -32,6 +36,42 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
   }
 }
 
+const authentication = asyncHandle(async (req, res, next) => {
+  /*
+    1- check userId missing
+    2- get accessToken
+    3- verify
+    4- check user in db
+    5- check keystore with userId
+    6- OK all return next
+  */
+  const userId = req.headers[HEADER.CLIENT_ID]
+  if (!userId) throw new AuthFailureError('Header is not defined')
+
+  const keyStore = await KeyTokenService.findByUserId(userId)
+  if (!keyStore) throw new NotFoundError('Not Found Keystore')
+
+  const accessToken = req.headers[HEADER.AUTHORIZATION]
+  if (!accessToken) throw new AuthFailureError('Header is not defined')
+
+  try {
+    console.log({ keyStore })
+    const decodeUser = JWT.verify(accessToken, keyStore.publicKey)
+    if (userId !== decodeUser.userId) throw AuthFailureError('Invalid user')
+    req.keyStore = keyStore
+    return next()
+
+  } catch(error) {
+    throw error
+  }
+})
+
+const verifyJWT = async (token, keySecret) => {
+  return await JWT.verify(token, keySecret)
+}
+
 module.exports = {
-  createTokenPair 
+  createTokenPair,
+  authentication,
+  verifyJWT
 }

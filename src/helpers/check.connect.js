@@ -8,5 +8,5 @@ const countConnect = () => {
 }
 
 module.exports = {
-  countConnect
+  countConnect,
 }

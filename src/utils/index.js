@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const getInfoData = ({ fields = [], object = {} }) => {
   return pick(object, fields)
 }
+
 const generateKeyPair = () => {
 // create private key, public key
 const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
@@ -21,6 +22,7 @@ const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
   });
   return { privateKey, publicKey }
 }
+
 module.exports = {
   getInfoData,
   generateKeyPair

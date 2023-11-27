@@ -28,8 +28,8 @@ var keyTokenSchema = new Schema({
         required: true,
     },
 }, {
-  collation: COLLECTION_NAME,
-  timestamps: true
+  timestamps: true,
+  collection: COLLECTION_NAME
 });
 
 //Export the model
