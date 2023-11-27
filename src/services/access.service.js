@@ -1,14 +1,17 @@
 'use strict';
 const shopModel = require('../models/shop.model');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
 const KeyTokenService = require('./keyToken.service');
-const { createTokenPair } = require('../auth/authUtils');
+const { createTokenPair, verifyJWT } = require('../auth/authUtils');
 const { getInfoData, generateKeyPair } = require('../utils');
 const { RoleShop } = require('../constants/roles.shop');
-const { BadRequestError, AuthFailureError } = require('../core/error.response');
+const { BadRequestError, AuthFailureError, ForbiddenRequestError } = require('../core/error.response');
 const { findByEmail } = require('./shop.service')
 class AccessService {
+
+  static logout = async (keyStore) => {
+    return await KeyTokenService.removeKeyById(keyStore._id)
+  }
   /*
     1 - check email in dbs
     2 - match password
@@ -70,23 +73,19 @@ class AccessService {
       // create private key, public key
       const { privateKey, publicKey } = generateKeyPair()
 
-      // save collection keyStore
-      const publicKeyString = await KeyTokenService.createKeyToken({
-        userId: newShop._id,
-        publicKey,
-      });
-
-      if (!publicKeyString) {
-        throw new BadRequestError('Error: publicKeyString error !')
-      }
-
-      const publicKeyObject = crypto.createPublicKey(publicKeyString);
 
       const token = await createTokenPair(
         { userId: newShop._id, email },
-        publicKeyObject,
-        privateKey
+        publicKey,
+        privateKey,
       );
+      // save collection keyStore
+      await KeyTokenService.createKeyToken({
+        userId: newShop._id,
+        publicKey,
+        privateKey,
+        refreshToken: token.refreshToken
+      });
 
       return {
         shop: getInfoData({
@@ -99,6 +98,54 @@ class AccessService {
 
     return null;
   };
+
+  static handleRefreshToken = async (refreshToken) => {
+    // check token had used
+    const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken)
+    console.log({ foundToken })
+
+    if (foundToken) {
+      // decode Token
+      const { userId, email } = await verifyJWT(refreshToken, foundToken.privateKey)
+      console.log({ userId, email })
+
+      // delete token in keystore
+      await KeyTokenService.deleteKeyById(userId)
+      throw new ForbiddenRequestError('Something wrong happened!! Please login again')
+    }
+    // Not used
+    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken)
+    if (!holderToken) throw new AuthFailureError('Shop not registered')
+
+    // verify token
+    const { userId, email } = await verifyJWT(refreshToken, holderToken.privateKey)
+
+    // check userId
+    const foundShop = await findByEmail({ email })
+    if (!foundShop) throw new AuthFailureError('Shop not registered')
+
+    // create new token
+    const token = await createTokenPair(
+      { userId, email },
+      holderToken.publicKey,
+      holderToken.privateKey
+    );
+
+    // update token
+    await holderToken.updateOne({
+      $set: {
+        refreshToken: token.refreshToken
+      },
+      $addToSet: {
+        refreshTokensUsed: refreshToken
+      }
+    })
+
+    return {
+      user: { userId, email },
+      token
+    }
+  }
 }
 
 module.exports = AccessService;
