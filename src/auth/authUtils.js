@@ -29,7 +29,7 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
       }
     })
     
-    console.log({ accessToken, privateKey })
+    // console.log({ accessToken, privateKey })
     return { accessToken, refreshToken }
   } catch (error) {
     return error
@@ -46,19 +46,36 @@ const authentication = asyncHandle(async (req, res, next) => {
     6- OK all return next
   */
   const userId = req.headers[HEADER.CLIENT_ID]
+
   if (!userId) throw new AuthFailureError('Header is not defined')
 
   const keyStore = await KeyTokenService.findByUserId(userId)
   if (!keyStore) throw new NotFoundError('Not Found Keystore')
 
+
+  const refreshToken = req.headers[HEADER.REFRESHTOKEN]
+  if (refreshToken) {
+    try {
+      const decodeUser = JWT.verify(refreshToken, keyStore.privateKey)
+      if (userId !== decodeUser.userId) throw AuthFailureError('Invalid user')
+      req.keyStore = keyStore
+      req.user = decodeUser
+      req.refreshToken = refreshToken
+      return next()
+  
+    } catch(error) {
+      throw error
+    }
+  }
+
   const accessToken = req.headers[HEADER.AUTHORIZATION]
   if (!accessToken) throw new AuthFailureError('Header is not defined')
 
   try {
-    console.log({ keyStore })
     const decodeUser = JWT.verify(accessToken, keyStore.publicKey)
     if (userId !== decodeUser.userId) throw AuthFailureError('Invalid user')
     req.keyStore = keyStore
+    req.user = decodeUser
     return next()
 
   } catch(error) {
