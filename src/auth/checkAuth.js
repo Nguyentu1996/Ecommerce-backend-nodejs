@@ -2,7 +2,6 @@
 
 const { HEADER } = require('../constants/header.api');
 const { findById } = require('../services/apiKey.service');
-
 const checkApiKey = async (req, res, next) => {
   try {
     const key = req.headers[HEADER.API_KEY]?.toString();
