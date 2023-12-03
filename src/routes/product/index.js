@@ -8,7 +8,13 @@ const productController = require('../../controllers/product.controller')
 // authentication
 routes.use(authentication)
 
-// create product
 routes.post('', asyncHandle(productController.createProduct))
+
+routes.post('/publish/:id', asyncHandle(productController.publishProductByShop))
+
+// QUERY //
+routes.get('/draft/all', asyncHandle(productController.getAllDraftForShop))
+routes.get('/publish/all', asyncHandle(productController.getAllPublishForShop))
+
 
 module.exports = routes
