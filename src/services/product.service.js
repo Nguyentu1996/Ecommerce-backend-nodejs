@@ -1,21 +1,49 @@
-'use strict';
-const { BadRequestError } = require('../core/error.response');
-const { product, clothing, electronic, furniture } = require('../models/product.modal');
+"use strict";
+const { BadRequestError } = require("../core/error.response");
+const {
+  product,
+  clothing,
+  electronic,
+  furniture,
+} = require("../models/product.modal");
+
+const {
+  findAllDraftForShop,
+  publishProductByShop,
+  findAllPublishForShop,
+} = require("../models/repositories/product.repo");
 
 // defined Factory class to create product
 
 class ProductFactory {
-  static productRegistry = {}
+  static productRegistry = {};
 
   static registerProductType(type, classRef) {
-    ProductFactory.productRegistry[type] = classRef
+    ProductFactory.productRegistry[type] = classRef;
   }
 
   static async createProduct(type, payload) {
-    const productClass = ProductFactory.productRegistry[type]
-    if (!productClass) throw new BadRequestError(`Invalid product types ${type}`)
+    const productClass = ProductFactory.productRegistry[type];
+    if (!productClass)
+      throw new BadRequestError(`Invalid product types ${type}`);
 
-    return new productClass(payload).createProduct()
+    return new productClass(payload).createProduct();
+  }
+
+  // PUT
+  static async publishProductByShop({ product_shop, product_id }) {
+    return await publishProductByShop({ product_shop, product_id });
+  }
+
+  // query
+  static async findAllDraftForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isDraft: true };
+    return await findAllDraftForShop({ query, limit, skip });
+  }
+
+  static async findAllPublishForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isPublished: true };
+    return await findAllPublishForShop({ query, limit, skip });
   }
 }
 
@@ -43,7 +71,7 @@ class Product {
   }
 
   async createProduct(product_id) {
-    return await product.create({ ...this, _id: product_id});
+    return await product.create({ ...this, _id: product_id });
   }
 }
 
@@ -54,10 +82,10 @@ class Clothing extends Product {
       ...this.product_attributes,
       product_shop: this.product_shop,
     });
-    if (!newClothing) throw new BadRequestError('Create new Clothing error');
+    if (!newClothing) throw new BadRequestError("Create new Clothing error");
 
     const newProduct = await super.createProduct();
-    if (!newProduct) throw new BadRequestError('Create new Product error');
+    if (!newProduct) throw new BadRequestError("Create new Product error");
     return newProduct;
   }
 }
@@ -69,10 +97,10 @@ class Electronic extends Product {
       ...this.product_attributes,
       product_shop: this.product_shop,
     });
-    if (!newElectronic) throw new BadRequestError('Create new Clothing error');
+    if (!newElectronic) throw new BadRequestError("Create new Clothing error");
 
     const newProduct = await super.createProduct(newElectronic._id);
-    if (!newProduct) throw new BadRequestError('Create new Product error');
+    if (!newProduct) throw new BadRequestError("Create new Product error");
     return newProduct;
   }
 }
@@ -84,17 +112,17 @@ class Furniture extends Product {
       ...this.product_attributes,
       product_shop: this.product_shop,
     });
-    if (!newFurniture) throw new BadRequestError('Create new Furniture error');
+    if (!newFurniture) throw new BadRequestError("Create new Furniture error");
 
     const newProduct = await super.createProduct(newFurniture._id);
-    if (!newProduct) throw new BadRequestError('Create new Furniture error');
+    if (!newProduct) throw new BadRequestError("Create new Furniture error");
     return newProduct;
   }
 }
 
 //register product types
-ProductFactory.registerProductType('Electronic', Electronic)
-ProductFactory.registerProductType('Clothing', Clothing)
-ProductFactory.registerProductType('Furniture', Furniture)
+ProductFactory.registerProductType("Electronic", Electronic);
+ProductFactory.registerProductType("Clothing", Clothing);
+ProductFactory.registerProductType("Furniture", Furniture);
 
 module.exports = ProductFactory;
