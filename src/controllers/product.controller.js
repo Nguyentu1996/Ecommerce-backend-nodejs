@@ -30,6 +30,22 @@ class ProductController {
   }
 
   /**
+   * @des unPublish Product by shop
+   * @param {Number} product_id 
+   * @param {Number} product_shop 
+   * @return {JSON}
+   */
+    unPublishProductByShop = async (req, res, next) => {
+      new SuccessResponse({
+        message: 'unPublish Product Success',
+        metadata: await ProductService.unPublishProductByShop( {
+          product_id: req.params.id,
+          product_shop: req.user.userId
+        })
+      }).send(res)
+    }
+
+  /**
    * @des Get all Drafts products for shop
    * @param {Number} limit 
    * @param {Number} skip 
@@ -55,6 +71,20 @@ class ProductController {
       message: 'Get List publish products Success',
       metadata: await ProductService.findAllPublishForShop({
         product_shop: req.user.userId
+      })
+    }).send(res)
+  }
+
+  /**
+   * @des Get list search products publish by user
+   * @param {String} keyword 
+   * @return {JSON}
+   */
+  getListSearchProduct = async (req, res, next) => {
+    new SuccessResponse({
+      message: 'Get List search publish products Success',
+      metadata: await ProductService.searchProductByUser({
+        keyword: req.params.keyword
       })
     }).send(res)
   }
