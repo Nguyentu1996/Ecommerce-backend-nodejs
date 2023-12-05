@@ -1,12 +1,13 @@
-"use strict";
+'use strict';
 
+const { getSelectData } = require('../../utils');
 const {
   product,
   electronic,
   furniture,
   clothing,
-} = require("../product.modal");
-const { Types } = require("mongoose");
+} = require('../product.modal');
+const { Types } = require('mongoose');
 
 const findAllDraftForShop = async ({ query, limit, skip }) => {
   return await queryProducts({ query, limit, skip });
@@ -52,17 +53,41 @@ const searchProductByUser = async ({ keyword }) => {
         isPublished: true,
         $text: { $search: regexSearch },
       },
-      { score: { $meta: "textScore" } }
+      { score: { $meta: 'textScore' } }
     )
-    .sort({ score: { $meta: "textScore" } })
+    .sort({ score: { $meta: 'textScore' } })
     .lean();
   return results;
+};
+
+const findAllProducts = async ({ limit, sort, page, filter, select }) => {
+  const skip = (page - 1) * limit;
+  const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 };
+  return await product
+    .find(filter)
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean();
+};
+
+const findProduct = async ({ product_id }) => {
+  const skip = (page - 1) * limit;
+  const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 };
+  return await product
+    .find(filter)
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean();
 };
 
 const queryProducts = async ({ query, limit, skip }) => {
   return await product
     .find(query)
-    .populate("product_shop", "email name -_id")
+    .populate('product_shop', 'email name -_id')
     .sort({ updateAt: -1 })
     .skip(skip)
     .limit(limit)
@@ -76,4 +101,5 @@ module.exports = {
   findAllPublishForShop,
   unPublishProductByShop,
   searchProductByUser,
+  findAllProducts,
 };
