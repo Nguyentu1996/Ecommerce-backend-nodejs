@@ -6,6 +6,7 @@ const { authentication } = require('../../auth/authUtils')
 const productController = require('../../controllers/product.controller')
 
 routes.get('/search/:keyword', asyncHandle(productController.getListSearchProduct))
+routes.get('', asyncHandle(productController.findAllProducts))
 
 // authentication
 routes.use(authentication)
