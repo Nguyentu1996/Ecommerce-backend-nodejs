@@ -14,7 +14,9 @@ const {
   unPublishProductByShop,
   searchProductByUser,
   findAllProducts,
-} = require('../models/repositories/product.repo');
+  findProduct,
+  updateProductById,
+} = require('../repositories/product.repo');
 
 // defined Factory class to create product
 
@@ -31,6 +33,14 @@ class ProductFactory {
       throw new BadRequestError(`Invalid product types ${type}`);
 
     return new productClass(payload).createProduct();
+  }
+
+  static async updateProduct(type, payload) {
+    const productClass = ProductFactory.productRegistry[type];
+    if (!productClass)
+      throw new BadRequestError(`Invalid product types ${type}`);
+
+    return new productClass(payload).updateProduct();
   }
 
   // PUT
@@ -66,6 +76,10 @@ class ProductFactory {
     const select = ['product_name', 'product_price', 'product_thumb'];
     return await findAllProducts({ limit, sort, page, filter, select });
   }
+
+  static async findProduct({ product_id }) {
+    return await findProduct({ product_id });
+  }
 }
 
 // defined base Product class
@@ -94,6 +108,14 @@ class Product {
   async createProduct(product_id) {
     return await product.create({ ...this, _id: product_id });
   }
+
+  async updateProduct(productId, payload) {
+    return await updateProductById({
+      productId,
+      model: product,
+      payload
+    });
+  }
 }
 
 // defined sub-class for difference product types Clothing
@@ -108,6 +130,22 @@ class Clothing extends Product {
     const newProduct = await super.createProduct();
     if (!newProduct) throw new BadRequestError('Create new Product error');
     return newProduct;
+  }
+
+  async updateProduct({ productId }) {
+    // 1 remove attributes null or undefined
+    const objectParams = this;
+    if (objectParams.product_attributes) {
+      // update child
+      return await updateProductById({
+        productId,
+        model: clothing,
+        payload: objectParams.product_attributes,
+        isNew: true,
+      });
+    }
+    const updatedProduct = await super.updateProduct(productId, objectParams);
+    return updatedProduct;
   }
 }
 
