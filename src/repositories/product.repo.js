@@ -1,12 +1,9 @@
 'use strict';
 
-const { getSelectData, unSelectData } = require('../../utils');
+const { getSelectData, unSelectData } = require('../utils');
 const {
   product,
-  electronic,
-  furniture,
-  clothing,
-} = require('../product.modal');
+} = require('../models/product.modal');
 const { Types } = require('mongoose');
 
 const findAllDraftForShop = async ({ query, limit, skip }) => {
@@ -79,6 +76,13 @@ const findProduct = async ({ product_id }) => {
     .lean();
 };
 
+const updateProductAttributesById = async ({ productId, payload, model, isNew = true }) => {
+  const query = { _id: productId };
+  const options = { upsert: true, new: isNew };
+
+  return await model.findOneAndUpdate(query, payload, options)
+}
+
 const updateProductById = async ({ productId, payload, model, isNew = true }) => {
   return await model.findByIdAndUpdate(productId, payload, { new: isNew })
 }
@@ -102,5 +106,6 @@ module.exports = {
   searchProductByUser,
   findAllProducts,
   findProduct,
+  updateProductAttributesById,
   updateProductById
 };
