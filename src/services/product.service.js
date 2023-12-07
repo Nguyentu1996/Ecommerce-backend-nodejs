@@ -17,6 +17,7 @@ const {
   findProduct,
   updateProductById,
 } = require('../repositories/product.repo');
+const { removeUndefinedObject, updateNestedObjectParse } = require('../utils');
 
 // defined Factory class to create product
 
@@ -35,12 +36,12 @@ class ProductFactory {
     return new productClass(payload).createProduct();
   }
 
-  static async updateProduct(type, payload) {
+  static async updateProduct(type, productId, payload) {
     const productClass = ProductFactory.productRegistry[type];
     if (!productClass)
       throw new BadRequestError(`Invalid product types ${type}`);
 
-    return new productClass(payload).updateProduct();
+    return new productClass(payload).updateProduct({ productId });
   }
 
   // PUT
@@ -113,7 +114,7 @@ class Product {
     return await updateProductById({
       productId,
       model: product,
-      payload
+      payload,
     });
   }
 }
@@ -134,17 +135,20 @@ class Clothing extends Product {
 
   async updateProduct({ productId }) {
     // 1 remove attributes null or undefined
-    const objectParams = this;
+    const objectParams = removeUndefinedObject(this);
     if (objectParams.product_attributes) {
       // update child
-      return await updateProductById({
+      await updateProductById({
         productId,
         model: clothing,
-        payload: objectParams.product_attributes,
+        payload: updateNestedObjectParse(objectParams.product_attributes),
         isNew: true,
       });
     }
-    const updatedProduct = await super.updateProduct(productId, objectParams);
+    const updatedProduct = await super.updateProduct(
+      productId,
+      updateNestedObjectParse(objectParams)
+    );
     return updatedProduct;
   }
 }
@@ -162,6 +166,25 @@ class Electronic extends Product {
     if (!newProduct) throw new BadRequestError('Create new Product error');
     return newProduct;
   }
+
+  async updateProduct({ productId }) {
+    // 1 remove attributes null or undefined
+    const objectParams = removeUndefinedObject(this);
+    if (objectParams.product_attributes) {
+      // update child
+      await updateProductById({
+        productId,
+        model: electronic,
+        payload: updateNestedObjectParse(objectParams.product_attributes),
+        isNew: true,
+      });
+    }
+    const updatedProduct = await super.updateProduct(
+      productId,
+      updateNestedObjectParse(objectParams)
+    );
+    return updatedProduct;
+  }
 }
 
 // defined sub-class for difference product types Clothing
@@ -176,6 +199,25 @@ class Furniture extends Product {
     const newProduct = await super.createProduct(newFurniture._id);
     if (!newProduct) throw new BadRequestError('Create new Furniture error');
     return newProduct;
+  }
+
+  async updateProduct({ productId }) {
+    // 1 remove attributes null or undefined
+    const objectParams = removeUndefinedObject(this);
+    if (objectParams.product_attributes) {
+      // update child
+      await updateProductById({
+        productId,
+        model: furniture,
+        payload: updateNestedObjectParse(objectParams.product_attributes),
+        isNew: true,
+      });
+    }
+    const updatedProduct = await super.updateProduct(
+      productId,
+      updateNestedObjectParse(objectParams)
+    );
+    return updatedProduct;
   }
 }
 

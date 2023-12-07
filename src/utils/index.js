@@ -1,6 +1,6 @@
 'use strict'
 
-const { pick } = require('lodash')
+const { pick, omitBy, isNil } = require('lodash')
 const crypto = require('crypto');
 
 const getInfoData = ({ fields = [], object = {} }) => {
@@ -15,6 +15,33 @@ const getSelectData = (select = []) => {
 // [a,b] => {a: 1, b: 1}
 const unSelectData = (select = []) => {
   return Object.fromEntries(select.map(el => [el, 0]))
+}
+
+const removeUndefinedObject = (obj) => {
+  return omitBy(obj, isNil)
+}
+
+/* 
+const a = {
+  b: 1,
+  c: 2
+}
+=> `a.b` = 1, `a.c` = 2
+ */
+const updateNestedObjectParse = (obj) => {
+  const final = {};
+  Object.keys(obj).forEach(k => {
+    if (typeof obj[k] === 'object' && !Array.isArray(obj[k])) {
+      const response = updateNestedObjectParse(obj[k]);
+      Object.keys(response).forEach(a => {
+        final[`${k}.${a}`] = response[a]
+      })
+    } else {
+      final[k] = obj[k]
+    }
+  })
+  console.log("final", { final })
+  return final;
 }
 
 const generateKeyPair = () => {
@@ -37,5 +64,7 @@ module.exports = {
   getInfoData,
   generateKeyPair,
   getSelectData,
-  unSelectData
+  unSelectData,
+  removeUndefinedObject,
+  updateNestedObjectParse
 }
