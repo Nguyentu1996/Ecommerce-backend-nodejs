@@ -40,10 +40,17 @@ class NotFoundError extends ErrorResponse {
   }
 }
 
+class UnProcessableError extends ErrorResponse {
+  constructor(message = ReasonPhrases.UNPROCESSABLE_ENTITY, statusCode = StatusCodes.UNPROCESSABLE_ENTITY) {
+    super(message, statusCode)
+  }
+}
+
 module.exports = {
   ConflictRequestError,
   BadRequestError,
   AuthFailureError,
   NotFoundError,
-  ForbiddenRequestError
+  ForbiddenRequestError,
+  UnProcessableError
 }
