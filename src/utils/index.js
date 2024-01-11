@@ -2,6 +2,8 @@
 
 const { pick, omitBy, isNil } = require('lodash')
 const crypto = require('crypto');
+const { Types } = require('mongoose');
+
 
 const getInfoData = ({ fields = [], object = {} }) => {
   return pick(object, fields)
@@ -19,6 +21,10 @@ const unSelectData = (select = []) => {
 
 const removeUndefinedObject = (obj) => {
   return omitBy(obj, isNil)
+}
+
+const toTypeMongoObjectId = (id) => {
+  return new Types.ObjectId(id)
 }
 
 /* 
@@ -66,5 +72,6 @@ module.exports = {
   getSelectData,
   unSelectData,
   removeUndefinedObject,
-  updateNestedObjectParse
+  updateNestedObjectParse,
+  toTypeMongoObjectId,
 }
