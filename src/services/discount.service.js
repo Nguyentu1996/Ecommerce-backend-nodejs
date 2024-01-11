@@ -1,6 +1,7 @@
 'use strict';
 
-const { createDiscount } = require('../repositories/discount.repo');
+const { BadRequestError } = require('../core/error.response');
+const { createDiscount, findOneDiscount } = require('../repositories/discount.repo');
 
 class Discount {
   constructor(builder) {
@@ -55,12 +56,12 @@ class DiscountBuilder {
   }
 
   withStartDate(startDate) {
-    this.start_date = startDate
+    this.start_date = new Date(startDate)
     return this
   }
 
-  withEndDate(startDate) {
-    this.start_date = startDate
+  withEndDate(endDate) {
+    this.start_date = new Date(endDate)
     return this
   }
 
@@ -69,13 +70,13 @@ class DiscountBuilder {
     return this
   }
 
-  withMinOrder(minOrderValue) {
-    this.min_order_value = minOrderValue
+  withMinOrderValue(minOrderValue) {
+    this.min_order_value = minOrderValue ?? 0
     return this
   }
 
   withProductIds(productIds) {
-    this.product_ids = productIds
+    this.product_ids = this.applies_to ? [] : productIds
     return this
   }
 
@@ -86,6 +87,46 @@ class DiscountBuilder {
 
   withDescription(description) {
     this.description = description
+    return this
+  }
+
+  withValue(value) {
+    this.value = value
+    return this
+  }
+
+  withMaxValue(maxValue) {
+    this.max_value = maxValue
+    return this
+  }
+
+  withActive(isActive) {
+    this.is_active = isActive
+    return this
+  }
+
+  withType(type) {
+    this.type = type
+    return this
+  }
+
+  withMaxUses(maxUses) {
+    this.max_uses = maxUses
+    return this
+  }
+
+  withUserCount(usesCount) {
+    this.uses_count = usesCount
+    return this
+  }
+
+  withMaxUserPerUse(maxUserPerUse) {
+    this.max_uses_per_use = maxUserPerUse
+    return this
+  }
+
+  withAppliesTo(appliesTo) {
+    this.applies_to = appliesTo
     return this
   }
 
@@ -125,7 +166,33 @@ class DiscountService {
       max_uses_per_use
     } = payload;
 
-    
+    const foundDiscount = await findOneDiscount({ code, shopId })
+    if (foundDiscount && foundDiscount.discount_is_active) {
+      throw BadRequestError('Discount exists!')
+    }
+
+    const builderDiscount = new DiscountBuilder();
+    const newDiscount = builderDiscount
+      .withCode(code)
+      .withStartDate(start_date)
+      .withEndDate(end_date)
+      .withDescription(description)
+      .withName(name)
+      .withMinOrder(min_order_value)
+      .withValue(value)
+      .withShop(shopId)
+      .withActive(is_active)
+      .withAppliesTo(applies_to)
+      .withProductIds(product_ids)
+      .withType(type)
+      .withMaxValue(max_value)
+      .withMinOrderValue(min_order_value)
+      .withMaxUses(max_uses)
+      .withUserCount(uses_count)
+      .withMaxUserPerUse(max_uses_per_use)
+      .build()
+
+    return await newDiscount.create()
   }
 }
 
