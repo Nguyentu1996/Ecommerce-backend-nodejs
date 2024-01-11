@@ -37,7 +37,7 @@ var disCountSchema = new Schema(
       type: Number,
       require: true,
     },
-    discount_user_count: {
+    discount_uses_count: {
       // số discount đã sử dụng
       type: Number,
       require: true,
