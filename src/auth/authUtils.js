@@ -56,7 +56,7 @@ const authentication = asyncHandle(async (req, res, next) => {
   const refreshToken = req.headers[HEADER.REFRESHTOKEN]
   if (refreshToken) {
     try {
-      const decodeUser = JWT.verify(refreshToken, keyStore.privateKey)
+      const decodeUser = verifyJWT(refreshToken, keyStore.publicKey)
       if (userId !== decodeUser.userId) throw AuthFailureError('Invalid user')
       req.keyStore = keyStore
       req.user = decodeUser
@@ -72,7 +72,7 @@ const authentication = asyncHandle(async (req, res, next) => {
   if (!accessToken) throw new AuthFailureError('Header is not defined')
 
   try {
-    const decodeUser = JWT.verify(accessToken, keyStore.publicKey)
+    const decodeUser = verifyJWT(accessToken, keyStore.publicKey)
     if (userId !== decodeUser.userId) throw AuthFailureError('Invalid user')
     req.keyStore = keyStore
     req.user = decodeUser

@@ -9,7 +9,7 @@ const findById = async (key) => {
 };
 
 const createApiKey = async () => {
-  return await apiKeyModel.create({ key: crypto.createHash('sha256', { outputLength: 25 }), status: true, permissions: ['0000'] })
+  return await apiKeyModel.create({ key: crypto.randomBytes(64).toString('hex'), status: true, permissions: ['0000'] })
 };
 
 module.exports = {
