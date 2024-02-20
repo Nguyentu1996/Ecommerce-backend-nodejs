@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const apiKeyModel = require('../models/apiKey.model');
 
 const findById = async (key) => {
@@ -7,6 +8,11 @@ const findById = async (key) => {
   return objKey;
 };
 
+const createApiKey = async () => {
+  return await apiKeyModel.create({ key: crypto.createHash('sha256', { outputLength: 25 }), status: true, permissions: ['0000'] })
+};
+
 module.exports = {
   findById,
+  createApiKey,
 };

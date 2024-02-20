@@ -1,12 +1,14 @@
 'use strict'
 
 const { HEADER } = require('../constants/header.api');
-const { findById } = require('../services/apiKey.service');
+const { findById, createApiKey } = require('../services/apiKey.service');
 
 const checkApiKey = async (req, res, next) => {
   try {
     const key = req.headers[HEADER.API_KEY]?.toString();
     if (!key) {
+      const apiKey = await createApiKey();
+      console.log(apiKey)
       return res.status(403).json({
         message: 'Forbidden Error'
       })
