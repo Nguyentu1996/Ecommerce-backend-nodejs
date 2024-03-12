@@ -11,6 +11,20 @@ const { validatorHandle } = require("../../helpers/validatorHandle");
 routes.use(authentication);
 
 routes.post(
+"", validatorHandle(createDisCountSchema),
+  asyncHandle(discountController.createDiscount)
+);
+routes.post(
+  "",
+  validatorHandle(createDisCountSchema),
+  asyncHandle(discountController.createDiscount)
+);
+routes.post(
+  "",
+  validatorHandle(createDisCountSchema),
+  asyncHandle(discountController.createDiscount)
+);
+routes.post(
   "",
   validatorHandle(createDisCountSchema),
   asyncHandle(discountController.createDiscount)
