@@ -1,7 +1,7 @@
 'use strict';
 
 const discountModel = require('../models/discount.model');
-const { toTypeMongoObjectId } = require('../utils');
+const { toTypeMongoObjectId, unSelectData, getSelectData } = require('../utils');
 
 const createDiscount = async (payload) => {
   return await discountModel.create(payload)
@@ -14,7 +14,44 @@ const findOneDiscount = async ({ code, shopId }) => {
   }).lean()
 }
 
+const findAllDiscountCodesUnSelect = async({
+  limit = 50, page = 1, sort = 'ctime',
+  filter, unSelect
+}) => {
+  const skip = (page - 1) * limit;
+  const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
+  const results = await discountModel.find(filter)
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(unSelectData(unSelect))
+    .lean()
+  return results
+}
+
+const findAllDiscountCodesSelect = async({
+  limit = 50, page = 1, sort = 'ctime',
+  filter, select
+}) => {
+  const skip = (page - 1) * limit;
+  const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
+  const results = await discountModel.find(filter)
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean()
+  return results
+}
+
+const checkDiscountExists = async (filter) => {
+  return await discountModel.findOne(filter).lean()
+}
+
 module.exports = {
   createDiscount,
-  findOneDiscount
+  findOneDiscount,
+  findAllDiscountCodesUnSelect,
+  findAllDiscountCodesSelect,
+  checkDiscountExists
 }
