@@ -39,5 +39,5 @@ var shopSchema = new Schema({
   collection: COLLECTION_NAME
 });
 
-//Export the model
+//Export the model 
 module.exports = model(DOCUMENT_NAME, shopSchema);

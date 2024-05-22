@@ -8,8 +8,8 @@ const COLLECTION_NAME = 'Apikeys';
 var apiKeySchema = new Schema({
     key:{
         type:String,
-        required:true,
-        unique:true,
+        required: true,
+        unique: true,
       },
     status:{
         type: Boolean,
