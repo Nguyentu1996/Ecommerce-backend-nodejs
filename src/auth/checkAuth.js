@@ -7,8 +7,6 @@ const checkApiKey = async (req, res, next) => {
   try {
     const key = req.headers[HEADER.API_KEY]?.toString();
     if (!key) {
-      // const apiKey = await createApiKey();
-      // console.log('API-KEY', apiKey)
       return res.status(403).json({
         message: 'Forbidden Error'
       })

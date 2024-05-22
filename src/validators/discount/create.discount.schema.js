@@ -21,4 +21,3 @@ const createDiscountSchema = Joi.object({
 });
 
 module.exports = createDiscountSchema;
-
