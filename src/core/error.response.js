@@ -4,11 +4,12 @@ const {
   StatusCodes,
   ReasonPhrases,
 } = require('../utils/httpStatusCode')
-
+const AppLogger = require('../loggers/winston.log')
 class ErrorResponse extends Error {
   constructor(message, status) {
     super(message)
     this.status = status
+    this.now = Date.now();
   }
 }
 
