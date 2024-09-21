@@ -40,6 +40,8 @@ app.use((req, res, next) => {
 
 // init db
 require('./dbs/init.mongodb')
+const redis = require('./dbs/init.redis');
+redis.initRedis();
 
 // init router
 app.use('', require('./routes'))
