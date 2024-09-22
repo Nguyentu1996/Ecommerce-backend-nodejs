@@ -7,6 +7,10 @@ const dev = {
     host: process.env.DEV_DB_HOST,
     port: process.env.DEV_DB_PORT,
     name: process.env.DEV_DB_NAME,
+  },
+  redis: {
+    host: process.env.DEV_REDIS_HOST,
+    port: process.env.DEV_REDIS_PORT,
   }
 }
 const pro = {
