@@ -1,7 +1,7 @@
 'use strict'
 
 const { createClient } = require('redis')
-const { redis: { host, port } } = require('../configs/config')
+const { redis: { host, port } } = require('../configs/connection.config.js')
 const { RedisConnectionError } = require('../core/error.response')
 
 let client = {}, statusConnect = {
@@ -40,7 +40,9 @@ const handleEventConnect = ({ connectionRedis }) => {
     })
 
     connectionRedis.on(statusConnect.RECONNECT, () => {
-        console.log(`connection Redis status: reconnecting`)
+        console.log(`connection Redis status: reconnecting`);
+        if (connectionTimeout)
+            clearTimeout(connectionTimeout);
     })
 
     connectionRedis.on(statusConnect.ERROR, (error) => {

@@ -18,6 +18,7 @@ const {
   updateProductById,
 } = require('../repositories/product.repo');
 const { removeUndefinedObject, updateNestedObjectParse } = require('../utils');
+const NotificationService = require('./notification.service');
 
 // defined Factory class to create product
 
@@ -107,7 +108,20 @@ class Product {
   }
 
   async createProduct(product_id) {
-    return await product.create({ ...this, _id: product_id });
+    const newProduct = await product.create({ ...this, _id: product_id });
+    if (newProduct) {
+      NotificationService.pushNoticeToSystem({
+        type: 'SHOP',
+        receiverId: 1,
+        senderId: this.product_shop,
+        options: {
+          product_name: this.product_name,
+          shop_name: this.product_shop
+        }
+      })
+      .then(rs => console.log(rs))
+      .catch(console.error);
+    }
   }
 
   async updateProduct(productId, payload) {
