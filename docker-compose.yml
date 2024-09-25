@@ -16,6 +16,10 @@ services:
       DEV_REDIS_HOST: redis
       DEV_REDIS_PORT: 6379
       DEV_APP_PORT: 3000
+      DEV_DB_HOST: mongo
+      DEV_DB_PORT: 27017
+      DEV_DB_NAME: shopDEV
+      LOG_LEVEL: info
   mongo:
     image: mongo
     container_name: mongo
