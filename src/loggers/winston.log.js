@@ -1,5 +1,5 @@
 'use strict';
-const { createLogger, transports, format  } = require('winston');
+const { createLogger, transports, format } = require('winston');
 require('winston-daily-rotate-file');
 const { v4: uuidv4 } = require('uuid');
 
@@ -15,8 +15,8 @@ class AppLogger {
       format: format.combine(
         format.timestamp({
           format: 'YYYY-MM-DD HH:mm:ss',
-          formatPrint
-        })
+        }),
+        formatPrint
       ),
 
       transports: [
@@ -30,9 +30,9 @@ class AppLogger {
           maxFiles: '14d',
           format: format.combine(
             format.timestamp({
-              format: 'YYYY-MM-DD HH:mm:ss',
-              formatPrint
-            })
+              format: 'YYYY-MM-DD HH:mm:ss'
+            }),
+            formatPrint
           ),
           level: 'info'
         }),
@@ -45,9 +45,9 @@ class AppLogger {
           maxFiles: '14d',
           format: format.combine(
             format.timestamp({
-              format: 'YYYY-MM-DD HH:mm:ss',
-              formatPrint
-            })
+              format: 'YYYY-MM-DD HH:mm:ss'
+            }),
+            formatPrint
           ),
           level: 'error'
         })
@@ -75,7 +75,7 @@ class AppLogger {
   log(message, params) {
     const paramLog = this.commonParams(params)
     const logObject = { message, ...paramLog }
-    this.logger.info(logObject)
+    this.logger.info(logObject);
   }
 
   error(message, params) {
