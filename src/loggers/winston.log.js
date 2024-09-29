@@ -2,7 +2,7 @@
 const { createLogger, transports, format } = require('winston');
 require('winston-daily-rotate-file');
 const { v4: uuidv4 } = require('uuid');
-
+const path = require('path');
 class AppLogger {
   constructor() {
     const formatPrint = format.printf(
@@ -18,11 +18,12 @@ class AppLogger {
         }),
         formatPrint
       ),
+      
 
       transports: [
         new transports.Console(),
         new transports.DailyRotateFile({
-          dirname: 'src/logs',
+          dirname: path.basename(),
           filename: 'application-%DATE%.info.log',
           datePattern: 'YYYY-MM-DD-HH',
           zippedArchive: true,
@@ -37,7 +38,7 @@ class AppLogger {
           level: 'info'
         }),
         new transports.DailyRotateFile({
-          dirname: 'src/logs',
+          dirname: path.basename(),
           filename: 'application-%DATE%.error.log',
           datePattern: 'YYYY-MM-DD-HH',
           zippedArchive: true,
