@@ -1,25 +1,27 @@
 version: '1'
 services:
   nodejs-app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./:/app
     working_dir: /app
-    container_name: nodejs-app
+    env_file: ./.env
+    restart: always
     ports:
       - "3000:3000"
     depends_on:
       - mongo
       - redis
     environment:
-      MONGO_URL: mongodb://mongo:27017/shopDEV
-      DEV_REDIS_HOST: redis
-      DEV_REDIS_PORT: 6379
-      DEV_APP_PORT: 3000
-      DEV_DB_HOST: mongo
-      DEV_DB_PORT: 27017
-      DEV_DB_NAME: shopDEV
-      LOG_LEVEL: info
+      DEV_REDIS_HOST: ${DEV_REDIS_HOST}
+      DEV_REDIS_PORT: ${DEV_REDIS_PORT}
+      DEV_APP_PORT: ${DEV_APP_PORT}
+      DEV_DB_HOST: ${DEV_DB_HOST}
+      DEV_DB_PORT: ${DEV_DB_PORT}
+      DEV_DB_NAME: ${DEV_DB_NAME}
+      LOG_LEVEL: ${LOG_LEVEL}
   mongo:
     image: mongo
     container_name: mongo
