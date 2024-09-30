@@ -43,6 +43,12 @@ require('./dbs/init.mongodb')
 const redis = require('./dbs/init.redis');
 redis.initRedis();
 
+// init Queue
+const { sendQueue } = require('./queue/producer');
+const { receiveQueue } = require('./queue/consumer');
+sendQueue({ msg: 'Hello world' });
+receiveQueue();
+
 // init router
 app.use('', require('./routes'))
 
