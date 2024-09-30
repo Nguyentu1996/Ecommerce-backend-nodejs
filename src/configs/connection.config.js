@@ -11,6 +11,9 @@ const dev = {
   redis: {
     host: process.env.DEV_REDIS_HOST,
     port: process.env.DEV_REDIS_PORT,
+  },
+  rabbitMq: {
+    url: process.env.DEV_RABBITMQ_URL
   }
 }
 const pro = {

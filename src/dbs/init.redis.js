@@ -52,6 +52,7 @@ const handleEventConnect = ({ connectionRedis }) => {
 }
 
 const initRedis = () => {
+    console.log(`connecting redis: redis://${host}:${port}`);
     const instanceRedis = createClient({
         url: `redis://${host}:${port}`
     });

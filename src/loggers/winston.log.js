@@ -23,7 +23,7 @@ class AppLogger {
       transports: [
         new transports.Console(),
         new transports.DailyRotateFile({
-          dirname: path.basename(),
+          dirname: path.join(__dirname, 'logs'),
           filename: 'application-%DATE%.info.log',
           datePattern: 'YYYY-MM-DD-HH',
           zippedArchive: true,
@@ -38,7 +38,7 @@ class AppLogger {
           level: 'info'
         }),
         new transports.DailyRotateFile({
-          dirname: path.basename(),
+          dirname: path.join(__dirname, 'logs'),
           filename: 'application-%DATE%.error.log',
           datePattern: 'YYYY-MM-DD-HH',
           zippedArchive: true,
