@@ -122,6 +122,7 @@ class Product {
       .then(rs => console.log(rs))
       .catch(console.error);
     }
+    return newProduct
   }
 
   async updateProduct(productId, payload) {

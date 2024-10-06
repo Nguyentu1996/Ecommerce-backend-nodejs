@@ -1,5 +1,6 @@
 'use strict';
-const { Notification } = require('../models/notification.model');
+
+const Notification = require('../models/notification.model');
 
 class NotificationService {
 
@@ -7,7 +8,7 @@ class NotificationService {
         type = 'SHOP',
         receiverId = 1,
         senderId = 1,
-        options: {}
+        options = {}
     }) => {
 
         let notice_content

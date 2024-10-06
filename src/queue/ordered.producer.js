@@ -2,9 +2,9 @@ const amqplib = require('amqplib');
 const { rabbitMq: { url } } = require('../configs/connection.config.js')
 const amqplib_url = url;
 
-const sendQueue = async ({ msg }) => {
+const sendQueueOrdered = async () => {
     try {
-        const queue = 'tasks';
+        const queue = 'ordered-message';
         const conn = await amqplib.connect(amqplib_url);
         // create chanel
         const chanel = await conn.createChannel();
@@ -12,12 +12,19 @@ const sendQueue = async ({ msg }) => {
         await chanel.assertQueue(queue, {
             durable: true
         });
-        console.log(`Queue '${queue}' is asserted as durable`);
+
         //send queue
-        await chanel.sendToQueue(queue, Buffer.from(msg), {
-            // expiration: '10000', // TTL time to live 10s
-            persistent: true
-        });
+        for (let index = 0; index < 10; index++) {
+            const message = `Message ordered ${index}`;
+            chanel.sendToQueue(queue, Buffer.from(message), {
+                // expiration: '10000', // TTL time to live 10s
+                persistent: true
+            });
+        }
+
+        setTimeout(() => {
+            conn.close();
+        }, 500)
 
     } catch (error) {
         console.error('Error::', error.message)
@@ -25,5 +32,5 @@ const sendQueue = async ({ msg }) => {
 
 }
 module.exports = {
-    sendQueue,
+    sendQueueOrdered,
 }

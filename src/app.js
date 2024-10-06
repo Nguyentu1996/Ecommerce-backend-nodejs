@@ -44,10 +44,10 @@ const redis = require('./dbs/init.redis');
 redis.initRedis();
 
 // init Queue
-const { sendQueue } = require('./queue/producer');
-const { receiveQueue } = require('./queue/consumer');
-sendQueue({ msg: 'Hello world' });
-receiveQueue();
+// const { sendQueue } = require('./queue/producer');
+// const { sendQueueDLX } =  require('./queue/producerDLX');
+const { sendQueueOrdered } = require('./queue/ordered.producer');
+sendQueueOrdered();
 
 // init router
 app.use('', require('./routes'))

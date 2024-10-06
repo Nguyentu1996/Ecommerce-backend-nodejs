@@ -12,9 +12,10 @@ const receiveQueue = async () => {
         await chanel.assertQueue(queue, {
             durable: true
         });
-        //send queue
         await chanel.consume(queue, msg => {
             console.log(`Message::`, msg.content.toString())
+            // Xử lý xong message, gửi ack để RabbitMQ xóa nó khỏi hàng đợi
+            chanel.ack(msg);
         });
 
     } catch (error) {
