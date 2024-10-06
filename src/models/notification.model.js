@@ -9,7 +9,7 @@ const NotificationSchema = Schema({
    notice_senderId: { type: Types.ObjectId, required: true, ref: 'Shop' },
    notice_receivedId: { type: Number, required: true },
    notice_content: { type: String, required: true },
-   notice_options: { type: String, default: {} },
+   notice_options: { type: Object, default: {} },
 }, {
     timestamps: true,
     collection: COLLECTION_NAME,

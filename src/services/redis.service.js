@@ -1,11 +1,8 @@
 'use strict'
 
-const redis = require('redis')
-const redisClient = redis.createClient()
-redisClient.on('error', (err) => {
-    console.error('Redis error:', err);
-});
+const { getRedis } = require("../dbs/init.redis");
 
+const redisClient = getRedis()
 
 const setCache = async (key, value) => {
     await redisClient.set(key, value);
