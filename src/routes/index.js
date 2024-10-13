@@ -1,6 +1,7 @@
 'use strict'
 const express = require('express')
 const { checkApiKey, checkPermission } = require('../auth/checkAuth')
+const { asyncHandle } = require('../helpers/asyncHandle')
 const router = express.Router()
 
 // check apiKey
