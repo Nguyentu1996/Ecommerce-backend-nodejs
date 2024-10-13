@@ -43,12 +43,6 @@ require('./dbs/init.mongodb')
 const redis = require('./dbs/init.redis');
 redis.initRedis();
 
-// init Queue
-// const { sendQueue } = require('./queue/producer');
-// const { sendQueueDLX } =  require('./queue/producerDLX');
-const { sendQueueOrdered } = require('./queue/ordered.producer');
-sendQueueOrdered();
-
 // init router
 app.use('', require('./routes'))
 
@@ -68,12 +62,16 @@ app.use((error, req, res, next) => {
     { message: error.message }
   ])
 
-  return res.status(statusCode).json({
+  let responseError = {
     status: 'error',
     code: statusCode,
-    stack: error.stack,
     message: error.message || 'Internal Server Error'
-  })
+  }
+
+  if (process.env.NODE_ENV !== 'pro') {
+    responseError = { ...responseError, stack: error.stack };
+  }
+  return res.status(statusCode).json(responseError)
 })
 
 module.exports = app

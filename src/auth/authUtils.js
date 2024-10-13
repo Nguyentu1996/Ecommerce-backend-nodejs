@@ -56,7 +56,7 @@ const authentication = asyncHandle(async (req, res, next) => {
   const refreshToken = req.headers[HEADER.REFRESHTOKEN]
   if (refreshToken) {
     try {
-      const decodeUser = await verifyJWT(refreshToken, keyStore.privateKey)
+      const decodeUser = await verifyJWT(refreshToken, keyStore.publicKey)
       if (userId !== decodeUser.userId) throw AuthFailureError('Invalid user')
       req.keyStore = keyStore
       req.user = decodeUser
