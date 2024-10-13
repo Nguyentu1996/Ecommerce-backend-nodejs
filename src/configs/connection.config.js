@@ -14,6 +14,11 @@ const dev = {
   },
   rabbitMq: {
     url: process.env.DEV_RABBITMQ_URL
+  },
+  cloudinary: {
+    api_key: process.env.DEV_CLOUDINARY_API_KEY,
+    cloud_name: process.env.DEV_CLOUDINARY_NAME,
+    api_secret: process.env.DEV_CLOUDINARY_API_SECRET,
   }
 }
 const pro = {
