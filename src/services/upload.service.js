@@ -55,6 +55,7 @@ const uploadImageLocal = async ({ path, folderName = 'uploads' }) => {
       // public_id: 'thumb',
       folder: folderName
     });
+
     return {
       image_url: result.secure_url,
       thumb_url: await createImageThumb(result.public_id, {
@@ -123,7 +124,6 @@ const createImageTag = (publicId, ...colors) => {
 //     console.log(imageTag);
 
 // })();
-
 
 module.exports = {
   uploadImageUrl,
