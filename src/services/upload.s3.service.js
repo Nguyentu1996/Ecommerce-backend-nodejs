@@ -24,10 +24,22 @@ const uploadImageLocalS3 = async ({ file }) => {
       Bucket: process.env.DEV_AWS_BUCKET_NAME,
       Key: imageName
     })
+    // const url = await getSignedUrl(s3client, getCommand, { expiresIn: 3600 }); s3
     const result = await s3client.send(command)
-    const url = await getSignedUrl(s3client, getCommand, { expiresIn: 3600 })
+    const cloudfrontUrl = `${process.env.DEV_AWS_CLOUDFRONT_URL}/${imageName}`
+    const url = await getSignedUrl(
+      {
+        url: cloudfrontUrl,
+        keyPairId: process.env.DEV_AWS_CLOUDFRONT_PUBLIC_KEY_ID,
+        dateLessThan: new Date(Date.now() + 1000 * 3600 ),
+        privateKey: process.env.DEV_AWS_CLOUDFRONT_PRIVATE_KEY,
+      }
+    );
 
-    return url;
+    return {
+      result,
+      url,
+    };
   } catch (error) {
     throw new BadRequestError('Upload fail')
   }
