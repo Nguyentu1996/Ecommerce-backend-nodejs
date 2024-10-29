@@ -1,5 +1,6 @@
 'use strict';
 const shopModel = require('../models/shop.model');
+const userModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const KeyTokenService = require('./keyToken.service');
 const { createTokenPair, verifyJWT } = require('../auth/authUtils');
@@ -52,6 +53,10 @@ class AccessService {
       }),
       token,
     };
+  }
+
+  static signUpUser = async ({}) => {
+
   }
 
   static signUp = async ({ name, email, password }) => {
