@@ -30,10 +30,7 @@ var shopSchema = new Schema({
       type: Schema.Types.Boolean,
       default: false
     },
-    roles: {
-      type: Array,
-      default: []
-    }
+    roles: [{ type: Schema.Types.ObjectId, required: true }]
 }, {
   timestamps: true,
   collection: COLLECTION_NAME

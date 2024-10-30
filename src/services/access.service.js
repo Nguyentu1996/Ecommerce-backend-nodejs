@@ -1,13 +1,13 @@
 'use strict';
 const shopModel = require('../models/shop.model');
-const userModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const KeyTokenService = require('./keyToken.service');
 const { createTokenPair, verifyJWT } = require('../auth/authUtils');
 const { getInfoData, generateKeyPair } = require('../utils');
 const { RoleShop } = require('../constants/roles.shop');
 const { BadRequestError, AuthFailureError, ForbiddenRequestError } = require('../core/error.response');
-const { findByEmail } = require('./shop.service')
+const { findByEmail } = require('./shop.service');
+const { getRoleByName } = require('./rabc.service');
 class AccessService {
 
   static logout = async (keyStore) => {
@@ -55,23 +55,19 @@ class AccessService {
     };
   }
 
-  static signUpUser = async ({}) => {
-
-  }
-
   static signUp = async ({ name, email, password }) => {
     // check email exists??
     const holderShop = await shopModel.findOne({ email }).lean();
     if (holderShop) {
       throw new BadRequestError('Error: Shop already registered!')
     }
-
+    const role = await getRoleByName({ rol_name: RoleShop.SHOP });
     const passwordHash = await bcrypt.hash(password, 10);
     const newShop = await shopModel.create({
       name,
       email,
       password: passwordHash,
-      roles: [RoleShop.SHOP],
+      roles: [role._id],
     });
 
     if (newShop) {

@@ -60,4 +60,5 @@ module.exports = {
   ForbiddenRequestError,
   UnProcessableError,
   RedisConnectionError,
+  ErrorResponse,
 }

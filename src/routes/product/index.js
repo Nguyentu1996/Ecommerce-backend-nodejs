@@ -11,17 +11,16 @@ routes.get('', asyncHandle(productController.findAllProducts))
 
 
 // authentication
-routes.use(authentication)
 
-routes.post('', asyncHandle(productController.createProduct))
-routes.patch('/:productId', asyncHandle(productController.updateProduct))
+routes.post('',authentication, asyncHandle(productController.createProduct))
+routes.patch('/:productId', authentication, asyncHandle(productController.updateProduct))
 
-routes.post('/publish/:id', asyncHandle(productController.publishProductByShop))
-routes.get('/unPublish/:id', asyncHandle(productController.unPublishProductByShop))
+routes.post('/publish/:id', authentication, asyncHandle(productController.publishProductByShop))
+routes.get('/unPublish/:id', authentication, asyncHandle(productController.unPublishProductByShop))
 
 // QUERY //
-routes.get('/draft/all', asyncHandle(productController.getAllDraftForShop))
-routes.get('/publish/all', asyncHandle(productController.getAllPublishForShop))
+routes.get('/draft/all', authentication, asyncHandle(productController.getAllDraftForShop))
+routes.get('/publish/all', authentication, asyncHandle(productController.getAllPublishForShop))
 
 
 module.exports = routes

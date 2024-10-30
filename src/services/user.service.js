@@ -1,0 +1,81 @@
+'use strict';
+
+const { ErrorResponse, AuthFailureError } = require('../core/error.response');
+const userModel = require('../models/user.model');
+const { createTempUser } = require('../repositories/user.repo');
+const EmailService = require('./email.service');
+const bcrypt = require('bcryptjs');
+const uniqueSlug = require('unique-slug');
+const { getRoleByName } = require('./rabc.service');
+const { RoleShop } = require('../constants/roles.shop');
+const OtpService = require('./otp.service');
+const { renderTemplateWelcome } = require('../utils/tem.email');
+class UserService {
+    static async newUser({
+        email = null,
+        captcha = null
+    }) {
+        // 1. check email exists in dbs
+
+        const user = await userModel.findOne({ email }).lean();
+
+        if (user) {
+            throw new ErrorResponse('Email already exists');
+        }
+
+        // 2. send mail
+        await EmailService.sendEmailToken({ email });
+        return { message: 'verify email token'}
+    }
+
+    static async newTempUser({ usr_email }) {
+        try {
+            const passwordHash = await bcrypt.hash(usr_email, 6);
+            const randomSlug = uniqueSlug();
+            const foundRole = await getRoleByName({ rol_name: RoleShop.USER });
+            const newUser = await createTempUser({
+                usr_email: usr_email,
+                usr_slug: randomSlug,
+                usr_password: passwordHash,
+                usr_role: foundRole._id
+            });
+            return newUser;
+        } catch (err) {
+            console.log({err})
+        }
+
+    }
+
+    static async verifyEmailToken({
+        verify_token
+    }) {
+        // 1 get token
+        const foundToken = await OtpService.getOtpToken({ verify_token });
+        if (!foundToken) throw new AuthFailureError('Email not registration');
+        // create new user temp
+        const tempUser = await UserService.newTempUser({ usr_email: foundToken.otp_email });
+        if (!tempUser) throw new ErrorResponse('User not registration');
+        
+        // update status token 
+        foundToken.otp_status = 'active';
+        await foundToken.save();
+
+        // send mail with temp password
+        const emailContent = await renderTemplateWelcome({
+            email_name: foundToken.usr_email,
+            password: tempUser.usr_password
+        });
+
+        EmailService.sendEmail({
+            html: emailContent,
+            toEmail: foundToken.otp_email,
+            subject: 'Thong tin dang nhap email đăng ký!',
+            text: 'Thong tin dang nhap email đăng ký!'
+        });
+        return {
+            success: 'registration user success'
+        }
+    }
+}
+
+module.exports = UserService

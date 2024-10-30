@@ -1,7 +1,6 @@
 'use strict'
 const express = require('express')
 const { checkApiKey, checkPermission } = require('../auth/checkAuth')
-const { asyncHandle } = require('../helpers/asyncHandle')
 const router = express.Router()
 
 // check apiKey
@@ -17,4 +16,6 @@ router.use('/v1/api/cart', require('./cart'))
 router.use('/v1/api', require('./access'))
 router.use('/v1/api/profile', require('./profile'))
 router.use('/v1/api', require('./rabc'))
-module.exports = router
+router.use('/v1/api/user', require('./user'))
+
+module.exports = router;

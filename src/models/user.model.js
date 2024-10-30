@@ -5,7 +5,7 @@ const DOCUMENT_NAME = 'User'
 const COLLECTION_NAME = 'Users'
 
 const userSchema = new Schema({
-    usr_id: { type: Number, index: true, required: true }, // username
+    // usr_id: { type: Number, index: true, required: true }, // username
     usr_slug: { type: String, required: true },
     usr_name: { type: String, default: '' },
     usr_password: { type: String, default: ''},

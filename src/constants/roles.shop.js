@@ -1,10 +1,11 @@
 'use strict'
 
 const RoleShop = {
-  SHOP: 'SHOP',
+  SHOP: 'shop',
   WRITER: 'WRITER',
   EDITOR: 'EDITOR',
-  ADMIN: 'ADMIN'
+  USER: 'user',
+  ADMIN: 'admin'
 }
 module.exports = {
   RoleShop
