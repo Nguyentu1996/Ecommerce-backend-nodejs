@@ -79,7 +79,7 @@ const authentication = asyncHandle(async (req, res, next) => {
     return next()
 
   } catch(error) {
-    throw error
+    throw new AuthFailureError(error)
   }
 })
 

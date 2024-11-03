@@ -10,11 +10,7 @@ routes.post('/shop/signup', asyncHandle(accessController.signUp))
 routes.post('/shop/login', asyncHandle(accessController.login))
 
 // authentication
-routes.use(authentication)
-// logout 
-routes.post('/shop/logout', asyncHandle(accessController.logout))
-routes.post('/shop/handleRefreshToken', asyncHandle(accessController.handleRefreshToken))
+routes.post('/shop/logout', authentication, asyncHandle(accessController.logout))
+routes.post('/shop/handleRefreshToken', authentication, asyncHandle(accessController.handleRefreshToken))
 
-
-
-module.exports = routes
+module.exports = routes;

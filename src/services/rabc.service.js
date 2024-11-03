@@ -52,6 +52,12 @@ const createRole = async ({
 
 }
 
+const getRoleByName = async ({
+    rol_name
+}) => {
+    return await Role.findOne({ rol_name }).lean().exec();
+}
+
 const roleList = async ({
     userId = 0, //admin
     limit = 30,
@@ -138,4 +144,5 @@ module.exports = {
     createRole,
     roleList,
     resourceList,
+    getRoleByName
 }

@@ -48,9 +48,8 @@ class BootstrapApp {
 
     this.app.use((error, req, res, next) => {
       const statusCode = error.status || 500;
-      const resMessage = `${statusCode} - ${
-        Date.now() - error.now
-      }ms - Response: ${JSON.stringify(error)}`;
+      const resMessage = `${statusCode} - ${Date.now() - error.now}ms - Response: ${JSON.stringify(error)}`;
+
       AppLogger.error(resMessage, [
         req.path,
         { requestId: req.requestId },

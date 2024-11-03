@@ -1,14 +1,35 @@
 'use strict';
 
-const AccessControl = require('accesscontrol');
+const { AuthFailureError } = require('../core/error.response')
+const rbac = require('../auth/rbac');
+const { roleList } = require('../services/rabc.service')
+const { getListCache, setListCache } = require('../services/redis.service');
 
-// grant list fetched from DB (to be converted to a valid grants object, internally)
-// const grantList = [
-//     { role: 'admin', resource: 'profile', action: 'read:any', attributes: '*' },
+const grantAccess = (action, resource) => {
+    return async (req, res, next) => {
+        try {
+            let roles = await getListCache('ROLES');
+            if (!roles.length) {
+                roles = await roleList({
+                    userId: 0,
+                });
+                await setListCache('ROLES', roles);
+            }
 
-//     { role: 'shop', resource: 'profile', action: 'read:own', attributes: '*' },
+            rbac.setGrants(roles);
+            const rol_name = req.user.role;
+            const permission = rbac.can(rol_name)[action](resource);
+            if (!permission.granted) {
+                throw new AuthFailureError(`you don't have permissions...`)
+            }
 
-//     { role: 'user', resource: 'profile', action: 'read:own', attributes: '*' }
+            next()
+        } catch(error) {
+            next(error)
+        }
+    }
+}
 
-// ];
-module.exports = new AccessControl();
+module.exports = {
+    grantAccess
+}
