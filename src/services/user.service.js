@@ -10,6 +10,8 @@ const { getRoleByName } = require('./rabc.service');
 const { RoleShop } = require('../constants/roles.shop');
 const OtpService = require('./otp.service');
 const { renderTemplateWelcome } = require('../utils/tem.email');
+const { generateKeyPair, getInfoData } = require('../utils');
+const KeyTokenService = require('./keyToken.service');
 class UserService {
     static async newUser({
         email = null,
@@ -43,7 +45,6 @@ class UserService {
         } catch (err) {
             console.log({err})
         }
-
     }
 
     static async verifyEmailToken({
@@ -60,6 +61,23 @@ class UserService {
         foundToken.otp_status = 'active';
         await foundToken.save();
 
+        // create private key, public key
+        const { privateKey, publicKey } = generateKeyPair()
+        const { _id: userId, usr_email } = tempUser;
+        const token = await createTokenPair(
+            { userId, email: usr_email },
+            publicKey,
+            privateKey
+        );
+
+        // save collection keyStore
+        await KeyTokenService.createKeyToken({
+            userId,
+            publicKey,
+            privateKey,
+            refreshToken: token.refreshToken
+        });
+
         // send mail with temp password
         const emailContent = await renderTemplateWelcome({
             email_name: foundToken.usr_email,
@@ -72,8 +90,13 @@ class UserService {
             subject: 'Thong tin dang nhap email đăng ký!',
             text: 'Thong tin dang nhap email đăng ký!'
         });
+
         return {
-            success: 'registration user success'
+            user: getInfoData({
+                fields: ['_id', 'usr_name', 'usr_email'],
+                object: tempUser,
+            }),
+            token,
         }
     }
 }
