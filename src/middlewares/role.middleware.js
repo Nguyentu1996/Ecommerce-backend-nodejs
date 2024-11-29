@@ -2,7 +2,7 @@
 
 const { AuthFailureError } = require('../core/error.response')
 const rbac = require('../auth/rbac');
-const { roleList } = require('../services/rabc.service')
+const { roleList } = require('../services/rbac.service')
 const { getListCache, setListCache } = require('../services/redis.service');
 
 const grantAccess = (action, resource) => {

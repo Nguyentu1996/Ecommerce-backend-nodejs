@@ -27,6 +27,7 @@ const handleTimeoutError = () => {
 
 const handleEventConnect = ({ connectionRedis }) => {
     connectionRedis.connect();
+    client.instanceConnect = connectionRedis;
 
     connectionRedis.on(statusConnect.CONNECT, () => {
         console.log(`connection Redis status: connected`);
@@ -52,12 +53,13 @@ const handleEventConnect = ({ connectionRedis }) => {
 }
 
 const initRedis = () => {
-    console.log(`connecting redis: redis://${host}:${port}`);
-    const instanceRedis = createClient({
-        url: `redis://${host}:${port}`
-    });
-    client.instanceConnect = instanceRedis;
-    handleEventConnect({ connectionRedis: instanceRedis })
+    if (!client.instanceConnect) {
+        console.log(`connecting redis: redis://${host}:${port}`);
+        const instanceRedis = createClient({
+            url: `redis://${host}:${port}`
+        });
+        handleEventConnect({ connectionRedis: instanceRedis })
+    }
 }
 
 const getRedis = () => client;

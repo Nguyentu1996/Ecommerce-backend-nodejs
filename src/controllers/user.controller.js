@@ -14,7 +14,7 @@ class UserController {
   verifyEmailToken = async (req, res, next) => {
     new SuccessResponse({
       message: 'Registered Success',
-      metadata: await UserService.verifyEmailToken({ verify_token: req.query.token }),
+      metadata: await UserService.userVerifyEmailToken({ verify_token: req.query.token }),
       options: {} // options response
     }).send(res)
     

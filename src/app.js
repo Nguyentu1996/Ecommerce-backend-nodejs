@@ -5,7 +5,10 @@ const express = require('express')
 const cors = require('cors')
 const { default: helmet } = require('helmet')
 const app = express();
-const bootstrap = require('./bootstrap');
+const { logRequest, appNotFoundError, appHandlerError } = require('./middlewares');
+const AppRateLimiter = require('./middlewares/rateLimit.middleware');
+const routes = require('./routes');
+const redis = require("./dbs/init.redis");
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -25,6 +28,13 @@ app.use(express.urlencoded({
   extended: true
 }))
 
-bootstrap(app);
+require("./dbs/init.mongodb");
+redis.initRedis();
+
+app.use(logRequest)
+app.use(AppRateLimiter({ endpoint: 'app' }))
+app.use("", routes);
+app.use(appNotFoundError)
+app.use(appHandlerError)
 
 module.exports = app

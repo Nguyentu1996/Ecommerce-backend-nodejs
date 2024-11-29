@@ -11,6 +11,7 @@ const { RoleShop } = require('../constants/roles.shop');
 const OtpService = require('./otp.service');
 const { renderTemplateWelcome } = require('../utils/tem.email');
 const { generateKeyPair, getInfoData } = require('../utils');
+const { createTokenPair } = require('../auth/authUtils');
 const KeyTokenService = require('./keyToken.service');
 class UserService {
     static async newUser({
@@ -32,7 +33,7 @@ class UserService {
 
     static async newTempUser({ usr_email }) {
         try {
-            const passwordHash = await bcrypt.hash(usr_email, 6);
+            const passwordHash = await bcrypt.hash(usr_email, 10);
             const randomSlug = uniqueSlug();
             const foundRole = await getRoleByName({ rol_name: RoleShop.USER });
             const newUser = await createTempUser({
@@ -47,15 +48,15 @@ class UserService {
         }
     }
 
-    static async verifyEmailToken({
+    static async userVerifyEmailToken({
         verify_token
     }) {
         // 1 get token
         const foundToken = await OtpService.getOtpToken({ verify_token });
         if (!foundToken) throw new AuthFailureError('Email not registration');
         // create new user temp
-        const tempUser = await UserService.newTempUser({ usr_email: foundToken.otp_email });
-        if (!tempUser) throw new ErrorResponse('User not registration');
+        const newUser = await UserService.newTempUser({ usr_email: foundToken.otp_email });
+        if (!newUser) throw new ErrorResponse('User not registration');
         
         // update status token 
         foundToken.otp_status = 'active';
@@ -63,16 +64,15 @@ class UserService {
 
         // create private key, public key
         const { privateKey, publicKey } = generateKeyPair()
-        const { _id: userId, usr_email } = tempUser;
         const token = await createTokenPair(
-            { userId, email: usr_email },
+            { userId: newUser._id, email: newUser.usr_email },
             publicKey,
-            privateKey
+            privateKey,
         );
 
         // save collection keyStore
         await KeyTokenService.createKeyToken({
-            userId,
+            userId: newUser._id,
             publicKey,
             privateKey,
             refreshToken: token.refreshToken
@@ -93,11 +93,12 @@ class UserService {
 
         return {
             user: getInfoData({
-                fields: ['_id', 'usr_name', 'usr_email'],
-                object: tempUser,
+                fields: ['_id', 'usr_slug', 'usr_email'],
+                object: newUser,
             }),
             token,
-        }
+        };
+
     }
 }
 
