@@ -7,6 +7,8 @@ WORKDIR /app
 
 # Copy package.json and install dependencies
 COPY package.json ./
+
+# RUN cp env.example .env
 RUN rm -rf node_modules && npm install
 
 # Copy the rest of the application files
